@@ -22,7 +22,6 @@ class NeuralNetwork(nn.Module):
         x = self.hidden_2(x)
         x = F.elu(x)
         x = self.out(x)
-        x = torch.tanh(x)
         return x
 
 
@@ -39,16 +38,16 @@ def train_network(epochs):
 
 
         #save images
-        inputs = np.arange(-10,10,0.01)
-        true_sin = np.sin(inputs)
-        with torch.no_grad():
-            net_sin = network(torch.Tensor(inputs).view(-1,1)).squeeze().numpy()
-        plt.plot(inputs,true_sin, label = 'Sinus function')
-        plt.plot(inputs,net_sin, label = 'Neural network')
-        plt.legend(loc = 1)
-        plt.xlim(-10,10)
-        plt.savefig('Plots/'+str(epoch)+'.png')
-        plt.clf()
+        # inputs = np.arange(-10,10,0.01)
+        # true_sin = np.sin(inputs)
+        # with torch.no_grad():
+        #     net_sin = network(torch.Tensor(inputs).view(-1,1)).squeeze().numpy()
+        # plt.plot(inputs,true_sin, label = 'Sinus function')
+        # plt.plot(inputs,net_sin, label = 'Neural network')
+        # plt.legend(loc = 1)
+        # plt.xlim(-10,10)
+        # plt.savefig('Plots/'+str(epoch)+'.png')
+        # plt.clf()
 
 
         #create training numbers
@@ -67,6 +66,18 @@ def train_network(epochs):
     
     plt.plot(range(len(losses)), losses)
     plt.show()
+    torch.save(network.state_dict(),'trained_network.pt')
+
+    #resulting function
+    inputs = np.arange(-10,10,0.01)
+    true_sin = np.sin(inputs)
+    with torch.no_grad():
+        net_sin = network(torch.Tensor(inputs).view(-1,1)).squeeze().numpy()
+    plt.plot(inputs,true_sin, label = 'Sine function')
+    plt.plot(inputs,net_sin, label = 'Neural network')
+    plt.legend(loc = 1)
+    plt.xlim(-10,10)
+    plt.show()
     
 def create_gif(folder):
     with imageio.get_writer('sinusgif15k.gif', mode = 'I', duration = 1/60) as writer:
@@ -74,7 +85,30 @@ def create_gif(folder):
             image = imageio.imread(folder+filename)
             writer.append_data(image)
 
-#train_network(10000)
-create_gif('Plots/')
+
+def plot_larger(range,network_path):
+    network = NeuralNetwork()
+    network.load_state_dict(torch.load(network_path))
+    network.eval()
+
+    inputs = np.arange(-range,range,0.01)
+    true_sin = np.sin(inputs)
+    with torch.no_grad():
+        net_sin = network(torch.Tensor(inputs).view(-1,1)).squeeze().numpy()
+    plt.plot(inputs,true_sin, label = 'Sinus function')
+    plt.plot(inputs,net_sin, label = 'Neural network')
+    plt.legend(loc = 1)
+    plt.xlim(-range,range)
+    plt.savefig('Plots/larger_plot.png')
+    plt.show()
+
+
+
+train_network(5000)
+#create_gif('Plots/')
+#plot_larger(100,'trained_network.pt')
 
         
+
+
+
